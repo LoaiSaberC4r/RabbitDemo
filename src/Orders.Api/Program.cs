@@ -119,4 +119,12 @@ app.MapPost("/test/IRequestClient", async (IRequestClient<IRequestClientRecord> 
 //End of Chaper Two
 
 //Chaper Three Audit Scheduling  TAP
+
+app.MapPost("/order/scheduler", async (IBus bus, string message) =>
+{
+    var scheduler = bus.CreateMessageScheduler();
+    var due = DateTime.UtcNow.AddSeconds(10);
+    var result = await scheduler.SchedulePublish(due, new SchedulingRecord(message));
+});
+
 app.Run();
