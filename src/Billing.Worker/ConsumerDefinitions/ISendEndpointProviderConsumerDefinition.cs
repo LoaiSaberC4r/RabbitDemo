@@ -16,6 +16,7 @@ namespace Billing.Worker.ConsumerDefinitions
             endpointConfigurator.PrefetchCount = 8;
             endpointConfigurator.UseMessageRetry(r => r.Immediate(3));
             endpointConfigurator.UseInMemoryOutbox();
+            endpointConfigurator.ConfigureConsumeTopology = false;
             if (endpointConfigurator is IRabbitMqReceiveEndpointConfigurator rmq)
             {
                 rmq.Bind("test-isend-endpoint-provider.exchange", x =>

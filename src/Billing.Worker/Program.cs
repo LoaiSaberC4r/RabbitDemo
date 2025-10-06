@@ -14,6 +14,7 @@ builder.Services.AddMassTransit(x =>
     x.AddConsumer<ISendEndpointProviderConsumer, ISendEndpointProviderConsumerDefinition>();
     x.AddConsumer<IPublishEndPointProviderConsumer, IPublishEndPointProviderConsumerDefinition>();
     x.AddConsumer<IRequestClientConsumer, IRequestClientConsumerDefinition>();
+    x.AddConsumer<IPublishEndPointProviderTAPConsumer, IPublishEndPointProviderTAPConsumerDefinition>();
 
     // 2) Endpoints
 
