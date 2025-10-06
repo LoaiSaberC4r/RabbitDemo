@@ -74,4 +74,14 @@ app.MapPost("/topic/order/{verb}", async (ISendEndpointProvider send, string ver
     return Results.Ok(new { Topic = rk, msg.OrderId });
 });
 
+app.MapPost("test/rabbitmq", async (ISendEndpointProvider send, string message) =>
+{
+    var endPoint = await send.GetSendEndpoint(new Uri("exchange:test.exchange?type=direct"));
+    await endPoint.Send(new TestRabbitMq(message), ctx =>
+    {
+        ctx.SetRoutingKey("test.key");
+        ctx.Durable = true;
+    });
+});
+
 app.Run();

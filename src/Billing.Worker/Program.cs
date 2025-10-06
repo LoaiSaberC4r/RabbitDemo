@@ -9,6 +9,7 @@ builder.Services.AddMassTransit(x =>
     x.AddConsumer<SubmitOrderConsumer>(cfg => cfg.UseConcurrentMessageLimit(8));
     x.AddConsumer<SmsNotificationConsumer>();
     x.AddConsumer<EmailNotificationConsumer>();
+    x.AddConsumer<TestRabbitMqConsumer>();
 
     x.UsingRabbitMq((ctx, cfg) =>
     {
@@ -89,6 +90,17 @@ builder.Services.AddMassTransit(x =>
                 x.RoutingKey = "order.*";
                 x.ExchangeType = "topic";
             });
+        });
+
+        cfg.ReceiveEndpoint("test-queue", e =>
+        {
+            e.Bind("test.exchange", x =>
+            {
+                x.RoutingKey = "test.key";
+                x.ExchangeType = "direct";
+            });
+            e.SetQueueArgument("x-message-ttl", 30000); // 30s
+            e.ConfigureConsumer<TestRabbitMqConsumer>(ctx);
         });
     });
 });
