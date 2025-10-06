@@ -5,6 +5,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddMassTransit(x =>
 {
+    x.AddRequestClient<IRequestClientRecord>();
     x.UsingRabbitMq((ctx, cfg) =>
     {
         cfg.Host("localhost", "dev", h =>
@@ -84,4 +85,34 @@ app.MapPost("test/rabbitmq", async (ISendEndpointProvider send, string message) 
     });
 });
 
+//Chaper Two ISendEndpointProvider , IPublishEndPoint , IRequestClient<T>
+
+//ISendEndpointProvider example
+app.MapPost("/test/IsendEndPointProvider", async (ISendEndpointProvider send, string message) =>
+{
+    var endPoint = await send.GetSendEndpoint(new Uri("exchange:test-isend-endpoint-provider.exchange?type=direct"));
+    var msg = new ISendEndPointProviderRecord(message);
+    await endPoint.Send(msg, ctx =>
+    {
+        ctx.SetRoutingKey("test-isend-endpoint-provider.key");
+        ctx.Durable = true;
+    });
+    return Results.Ok(new { Sent = msg });
+});
+
+//IPublishEndPoint example
+app.MapPost("/test/IPublishEndPoint", async (IPublishEndpoint publish, string message) =>
+{
+    var msg = new IPublishEndPointProviderRecord(message);
+    await publish.Publish(msg);
+    return Results.Ok(new { Sent = msg });
+});
+
+//IRequestClient<T> example
+app.MapPost("/test/IRequestClient", async (IRequestClient<IRequestClientRecord> client, string message) =>
+{
+    var msg = new IRequestClientRecord(message);
+    var response = await client.GetResponse<IRequestClientRecord>(msg);
+    return Results.Ok(response.Message);
+});
 app.Run();

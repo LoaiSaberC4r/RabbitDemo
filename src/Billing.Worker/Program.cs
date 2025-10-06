@@ -1,3 +1,4 @@
+using Billing.Worker.ConsumerDefinitions;
 using Billing.Worker.Consumers;
 using MassTransit;
 
@@ -10,6 +11,11 @@ builder.Services.AddMassTransit(x =>
     x.AddConsumer<SmsNotificationConsumer>();
     x.AddConsumer<EmailNotificationConsumer>();
     x.AddConsumer<TestRabbitMqConsumer>();
+    x.AddConsumer<ISendEndpointProviderConsumer, ISendEndpointProviderConsumerDefinition>();
+    x.AddConsumer<IPublishEndPointProviderConsumer, IPublishEndPointProviderConsumerDefinition>();
+    x.AddConsumer<IRequestClientConsumer, IRequestClientConsumerDefinition>();
+
+    // 2) Endpoints
 
     x.UsingRabbitMq((ctx, cfg) =>
     {
@@ -102,6 +108,8 @@ builder.Services.AddMassTransit(x =>
             e.SetQueueArgument("x-message-ttl", 30000); // 30s
             e.ConfigureConsumer<TestRabbitMqConsumer>(ctx);
         });
+
+        cfg.ConfigureEndpoints(ctx);
     });
 });
 
