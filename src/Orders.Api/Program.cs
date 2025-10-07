@@ -13,6 +13,8 @@ builder.Services.AddMassTransit(x =>
             h.Username("admin");
             h.Password("admin_ChangeMe!");
         });
+        //for using Quartz
+        cfg.UseMessageScheduler(new Uri("queue:quartz"));
     });
 });
 

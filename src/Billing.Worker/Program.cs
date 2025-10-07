@@ -1,9 +1,22 @@
 using Billing.Worker.ConsumerDefinitions;
 using Billing.Worker.Consumers;
 using MassTransit;
+using Quartz;
 
 var builder = Host.CreateApplicationBuilder(args);
-
+builder.Services.AddQuartz(q =>
+{
+    q.UseMicrosoftDependencyInjectionJobFactory();
+    //for preseistance Db store
+    // q.UsePersistentStore(s =>
+    // {
+    //     s.UseProperties = true;
+    //     s.UseSqlServer("Server=.\\SQLEXPRESS;Database=RabbitDemo_Quartz;Trusted_Connection=True;TrustServerCertificate=True;");
+    //     s.UseJsonSerializer();
+    //     s.UseClustering();
+    // });
+});
+builder.Services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
 builder.Services.AddMassTransit(x =>
 {
     // 1) Consumers
@@ -15,6 +28,9 @@ builder.Services.AddMassTransit(x =>
     x.AddConsumer<IPublishEndPointProviderConsumer, IPublishEndPointProviderConsumerDefinition>();
     x.AddConsumer<IRequestClientConsumer, IRequestClientConsumerDefinition>();
     x.AddConsumer<IPublishEndPointProviderTAPConsumer, IPublishEndPointProviderTAPConsumerDefinition>();
+    x.AddConsumer<TopicConsumer, TopicConsumerDefinition>();
+    x.AddConsumer<SchedulingRecordConsumer>();
+    x.AddQuartzConsumers();
 
     // 2) Endpoints
 
@@ -109,8 +125,10 @@ builder.Services.AddMassTransit(x =>
             e.SetQueueArgument("x-message-ttl", 30000); // 30s
             e.ConfigureConsumer<TestRabbitMqConsumer>(ctx);
         });
-
+        //For ConsumerDefinitions
         cfg.ConfigureEndpoints(ctx);
+        // Quartz
+        cfg.UseMessageScheduler(new Uri("queue:quartz"));
     });
 });
 

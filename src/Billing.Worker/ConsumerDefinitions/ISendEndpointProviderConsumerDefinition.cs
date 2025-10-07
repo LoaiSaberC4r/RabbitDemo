@@ -26,6 +26,12 @@ namespace Billing.Worker.ConsumerDefinitions
                 });
                 rmq.SetQueueArgument("x-dead-letter-exchange", "dlx.exchange");
                 rmq.SetQueueArgument("x-dead-letter-routing-key", "orders.submitted.rejected");
+                rmq.UseCircuitBreaker(cb =>
+                {
+                    cb.TripThreshold = (int)0.15;
+                    cb.ActiveThreshold = 10;
+                    cb.ResetInterval = TimeSpan.FromSeconds(10);
+                });
             }
         }
     }
