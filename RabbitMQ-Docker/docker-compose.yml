@@ -1,0 +1,25 @@
+version: "3.9"
+
+services:
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    container_name: rabbitmq
+    hostname: rabbit
+    restart: unless-stopped
+    ports:
+      - "5672:5672" # Port for AMQP (apps)
+      - "15672:15672" # Port for Management UI (browser)
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin_ChangeMe!
+      RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS: "-rabbit loopback_users []"
+      RABBITMQ_NODENAME: rabbit@localhost
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+      - ./rabbitmq/etc/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
+      - ./rabbitmq/etc/enabled_plugins:/etc/rabbitmq/enabled_plugins:ro
+      - ./rabbitmq/etc/definitions.json:/etc/rabbitmq/definitions.json:ro
+
+volumes:
+  rabbitmq_data:
+    name: rabbitmq_data
